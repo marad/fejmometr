@@ -23,13 +23,29 @@
   {:color "green"
    :message (->> (repo/leaders 5)
                  (map #(str (get % 0) ": " (get % 1)))
-                 (s/join "\n")
+                 (s/join "\\n")
                  )})
+
+(defn help [message args]
+  {:color "green"
+   :message_format "html"
+   :message "<b>Format: /fame command [args]</b><br/>
+            Commands:<br />
+            <ul>
+             <li><b>add</b> <i>person amount reason</i> - adds fame! (yey)</li>
+             <li><b>show</b> <i>person</i> - shows fame</li>
+             <li><b>leaders</b> - show leaders (beer)</li>
+            </ul>
+            "
+   }
+  )
 
 (def handlers
   {"add" add/execute
    "show" show
-   "leaders" leaders})
+   "leaders" leaders
+   "help" help
+   })
 
 (defn dispatch
   "Parses and dispatches message to apropriate command"
