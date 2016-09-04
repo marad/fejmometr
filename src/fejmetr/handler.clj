@@ -17,13 +17,13 @@
 
 (defn show [message]
   (let [user (msg/find-mention message (msg/command-args message))]
-  {:color "green"
-   :message (str (:mention_name user) " has " (repo/get-fame (:id user)) " fame")
-   }))
+    {:color "green"
+     :message (str (:mention_name user) " has " (repo/get-fame (:name user)) " fame")
+     }))
 
 (defn leaders [message]
   {:color "green"
-   :message (->> (repo/leaders 5)
+   :message (->> (repo/leaders 100)
                  (map #(str (get % 0) ": " (get % 1)))
                  (s/join "\\n")
                  )})

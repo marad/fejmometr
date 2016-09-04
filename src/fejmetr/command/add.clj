@@ -23,7 +23,7 @@
       (nil? receiver) {:color "red"
                        :message (str "Who is " (:receiver args) "?")
                        }
-      :else (do (repo/add-fame (:id receiver) (:name sender) (:reason args) (:amount args))
+      :else (do (repo/add-fame (:name receiver) (:name sender) (:reason args) (:amount args))
                 {:color "green"
                  :message (str (:mention_name receiver) " got " (:amount args) " fame from "
                                (:mention_name sender) "; reason: " (:reason args))})

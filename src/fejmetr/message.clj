@@ -13,7 +13,7 @@
       (nth 2)))
 
 (defn clear-mention [mention]
-  (.replaceAll mention "@" ""))
+  (.replaceAll (s/trim mention) "@" ""))
 
 (defn mentions [message]
   (get-in message [:item :message :mentions]))
