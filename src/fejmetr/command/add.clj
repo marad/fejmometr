@@ -17,6 +17,8 @@
     (assoc response
            :color "purple"
            :message (str "(heart) " (:message response) " (heart)")
+           :message_format "text"
+           :notify false
            )
     response
     )
