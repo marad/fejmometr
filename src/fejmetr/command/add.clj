@@ -19,9 +19,9 @@
         ]
     (println ">> " (find-mentioned message taker))
     (cond
-      (= taker giver-mention) {:color "red"
-                               :message "That's cheating!"
-                               }
+      ;(= taker giver-mention) {:color "red"
+      ;                         :message "That's cheating!"
+      ;                         }
       (nil? (find-mentioned message taker)) {:color "red"
                                              :message (str "Who is " taker "?")
                                              }
