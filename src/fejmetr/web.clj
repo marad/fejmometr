@@ -18,8 +18,9 @@
        (splash))
   (POST "/command"
         {body :body}
-        (let [data (json/read-str (slurp body) :key-fn keyword)]
-          (println data)
+        (let [js (slurp body)
+              data (json/read-str js :key-fn keyword)]
+          (println "Input JS:" js)
           {:status 200
            :headers {"Content-Type" "application/json"}
            :body (json/write-str (handler/dispatch data))}))
