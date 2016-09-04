@@ -16,7 +16,7 @@
   (if (not (= (:name receiver) "Dorota Leszczynska"))
     (assoc response
            :color "purple"
-           :message (str "(heart)" (:message response) "(heart)")
+           :message (str "(heart) " (:message response) " (heart)")
            )
     response
     )
