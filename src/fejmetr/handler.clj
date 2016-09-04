@@ -12,12 +12,24 @@
 
 (defn add [message args]
   (let [[taker amount reason] (s/split args #"\s" 3)]
-    {:message (str taker " got " amount " fame; reason: " reason)}))
+    {:color "green"
+     :message (str taker " got " amount " fame; reason: " reason)}))
 
-(defn leaders [message args])
+(defn show [message user]
+  {:color "green"
+   :message (str user " has " (repo/get-fame user) " fame")
+   })
+
+(defn leaders [message args]
+  {:color "green"
+   :message (->> (repo/leaders 5)
+                 (map #(str (get % 0) ": " (get % 1)))
+                 (s/join "\n")
+                 )})
 
 (def handlers
   {"add" add
+   "show" show
    "leaders" leaders})
 
 (defn dispatch
@@ -25,4 +37,8 @@
   [message]
   (let [{:keys [name args]} (parser/parse-command
                               (get-in message [:item :message :message]))]
-    ((handlers name) message args)))
+    (if-let [handler (handlers name)]
+      (handler message args)
+      {:color "red"
+       :message (str "Invalid command!")}
+      )))
