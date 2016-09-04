@@ -11,6 +11,17 @@
    :amount (read-string amount)
    :reason reason}))
 
+(defn decorate [receiver response]
+  (println (:name receiver))
+  (if (not (= (:name receiver) "Dorota Leszczynska"))
+    (assoc response
+           :color "purple"
+           :message (str "(heart)" (:message response) "(heart)")
+           )
+    response
+    )
+  )
+
 (defn execute [message]
   (let [args (parse-args message)
         sender (msg/sender message)
@@ -24,7 +35,9 @@
                        :message (str "Who is " (:receiver args) "?")
                        }
       :else (do (repo/add-fame (:name receiver) (:name sender) (:reason args) (:amount args))
-                {:color "green"
-                 :message (str (:mention_name receiver) " got " (:amount args) " fame from "
-                               (:mention_name sender) "; reason: " (:reason args))})
+                (decorate
+                  receiver
+                  {:color "green"
+                   :message (str (:mention_name receiver) " got " (:amount args) " fame from "
+                                 (:mention_name sender) "; reason: " (:reason args))}))
       )))
