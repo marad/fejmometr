@@ -12,7 +12,7 @@
 
 (defn add [message args]
   (let [[taker amount reason] (s/split args #"\s" 3)]
-    (repo/add-fame taker "from" reason amount)
+    (repo/add-fame taker "from" reason (read-string amount))
     {:color "green"
      :message (str taker " got " amount " fame; reason: " reason)}))
 
@@ -41,5 +41,5 @@
     (if-let [handler (handlers name)]
       (handler message args)
       {:color "red"
-       :message (str "Invalid command!")}
+       :message "Invalid command!"}
       )))
