@@ -6,7 +6,7 @@
 
 (defn parse-args [message]
   (let [args (msg/command-args message)
-        [receiver amount reason] (s/split args #"\s" 3)]
+        [receiver amount reason] (s/split args #"\s+" 3)]
   {:receiver (msg/clear-mention receiver)
    :amount (read-string amount)
    :reason reason}))
