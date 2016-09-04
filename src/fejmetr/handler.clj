@@ -2,6 +2,7 @@
   (:require [fejmetr.parser :as parser]
             [fejmetr.repo :as repo]
             [fejmetr.command.add :as add]
+            [fejmetr.message :as msg]
             [clojure.string :as s]
             ))
 
@@ -14,27 +15,28 @@
 ;     "message_format": "text"
 ; }
 
-(defn show [message user]
+(defn show [message]
+  (let [user (msg/find-mention message (msg/command-args message))]
   {:color "green"
-   :message (str user " has " (repo/get-fame user) " fame")
-   })
+   :message (str (:mention_name user) " has " (repo/get-fame (:id user)) " fame")
+   }))
 
-(defn leaders [message args]
+(defn leaders [message]
   {:color "green"
    :message (->> (repo/leaders 5)
                  (map #(str (get % 0) ": " (get % 1)))
                  (s/join "\\n")
                  )})
 
-(defn help [message args]
+(defn help [message]
   {:color "green"
    :message_format "html"
    :message "<b>Format: /fame command [args]</b><br/>
             Commands:<br />
             <ul>
-             <li><b>add</b> <i>person amount reason</i> - adds fame! (yey)</li>
+             <li><b>add</b> <i>person amount reason</i> - adds fame!</li>
              <li><b>show</b> <i>person</i> - shows fame</li>
-             <li><b>leaders</b> - show leaders (beer)</li>
+             <li><b>leaders</b> - show leaders</li>
             </ul>
             "
    }
@@ -50,7 +52,10 @@
 (defn dispatch
   "Parses and dispatches message to apropriate command"
   [message]
-  (let [{:keys [name args]} (parser/parse-command
+  (let [command-name (msg/command message)]
+    ((handlers command-name) message)
+    )
+  #_(let [{:keys [name args]} (parser/parse-command
                               (get-in message [:item :message :message]))]
     (if-let [handler (handlers name)]
       (handler message args)
