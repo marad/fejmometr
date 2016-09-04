@@ -28,9 +28,9 @@
         receiver (msg/find-mention message (:receiver args))
         ]
     (cond
-      (= (:id sender) (:id receiver)) {:color "red"
-                                       :message "That's cheating!"
-                                       }
+      ;(= (:id sender) (:id receiver)) {:color "red"
+      ;                                 :message "That's cheating!"
+      ;                                 }
       (nil? receiver) {:color "red"
                        :message (str "Who is " (:receiver args) "?")
                        }
