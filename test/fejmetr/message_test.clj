@@ -4,12 +4,19 @@
             ))
 
 (def add-message
-  {:item {:message {:from {:mention_name "Blinky" :name "Blinky the Fish"}
+  {:event "room_message"
+   :item {:message {:from {:mention_name "Blinky" :name "Blinky the Fish"}
                     :mentions [{:mention_name "sos"
                                 :name "Sweet Sauce"
                                 }]
                     :message "/fame add @sos 10 some reason"}
           :room {:name "test-room"}}})
+
+(deftest getting-event-type
+  (is (= (msg/event-type add-message)
+         "room_message"
+         ))
+  )
 
 (deftest getting-command-type
   (is (= (msg/command add-message)

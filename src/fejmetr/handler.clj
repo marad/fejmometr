@@ -40,8 +40,7 @@
              <li><b>leaders</b> - show leaders</li>
             </ul>
             "
-   }
-  )
+   })
 
 (def handlers
   {"add" add/execute
@@ -53,13 +52,7 @@
 (defn dispatch
   "Parses and dispatches message to apropriate command"
   [message]
-  (let [command-name (msg/command message)]
-    ((handlers command-name) message)
-    )
-  #_(let [{:keys [name args]} (parser/parse-command
-                              (get-in message [:item :message :message]))]
-    (if-let [handler (handlers name)]
-      (handler message args)
-      {:color "red"
-       :message "Invalid command!"}
-      )))
+  (if-let [handler (handlers (msg/command message))]
+    (handler message)
+    {:color "red"
+     :message "Invalid command!"}))

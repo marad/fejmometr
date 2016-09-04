@@ -1,15 +1,18 @@
 (ns fejmetr.message
   (:require [clojure.string :as s]))
 
+(defn event-type [message]
+  (:event message))
+
 (defn command [message]
   (-> (get-in message [:item :message :message])
-       (s/split #"\s" 3)
+       (s/split #"\s+" 3)
        (nth 1)
        ))
 
 (defn command-args [message]
   (-> (get-in message [:item :message :message])
-      (s/split #"\s" 3)
+      (s/split #"\s+" 3)
       (nth 2)))
 
 (defn clear-mention [mention]
