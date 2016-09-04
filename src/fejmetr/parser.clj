@@ -1,8 +1,5 @@
 (ns fejmetr.parser
-  (:require [clojure.string :as s])
-  )
-
-; /command name args
+  (:require [clojure.string :as s]))
 
 (defn parse-command [command]
   (zipmap [:name :args]

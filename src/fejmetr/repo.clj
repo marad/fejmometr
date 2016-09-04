@@ -26,6 +26,4 @@
     (map (juxt identity get-fame))
     (sort-by #(get % 1))
     reverse
-    (take amount)
-    )
-  )
+    (take amount)))
