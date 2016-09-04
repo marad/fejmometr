@@ -12,6 +12,7 @@
 
 (defn add [message args]
   (let [[taker amount reason] (s/split args #"\s" 3)]
+    (repo/add-fame taker "from" reason amount)
     {:color "green"
      :message (str taker " got " amount " fame; reason: " reason)}))
 
