@@ -30,6 +30,7 @@
 
 (defn help [message]
   {:color "green"
+   :notify false
    :message_format "html"
    :message "<b>Format: /fame command [args]</b><br/>
             Commands:<br />

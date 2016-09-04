@@ -13,7 +13,7 @@
 
 (defn decorate [receiver response]
   (println (:name receiver))
-  (if (not (= (:name receiver) "Dorota Leszczynska"))
+  (if (= (:name receiver) "Dorota Leszczynska")
     (assoc response
            :color "purple"
            :message (str "(heart) " (:message response) " (heart)")
@@ -30,9 +30,9 @@
         receiver (msg/find-mention message (:receiver args))
         ]
     (cond
-      ;(= (:id sender) (:id receiver)) {:color "red"
-      ;                                 :message "That's cheating!"
-      ;                                 }
+      (= (:id sender) (:id receiver)) {:color "red"
+                                       :message "That's cheating!"
+                                       }
       (nil? receiver) {:color "red"
                        :message (str "Who is " (:receiver args) "?")
                        }
