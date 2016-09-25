@@ -6,12 +6,13 @@
             [ring.adapter.jetty :as jetty]
             [clojure.data.json :as json]
             [fejmetr.handler :as handler]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]])
+  (:gen-class))
 
 (defn splash []
   {:status 200
    :headers {"Content-Type" "text/plain"}
-   :body "Hello from Heroku!"})
+   :body "Fejmetr 1.0.1!"})
 
 (defroutes app
   (GET "/" []

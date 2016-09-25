@@ -3,17 +3,18 @@
             [monger.collection :as mc]
             [mount.core :refer [defstate]]))
 
-(defstate conn
-  :start (mg/connect)
-  :stop (mg/disconnect))
-
-(defstate db
-  :start (mg/get-db conn "fejmetr"))
-
 (def coll "fame")
+(def db (atom nil))
+
+(defstate conn
+  :start (let [conn (mg/connect)]
+           (reset! db (mg/get-db conn "fejmetr"))
+           conn)
+  :stop (do (mg/disconnect conn)
+            (reset! db nil)))
 
 (defn get-record [user]
-  (let [result (mc/find-maps db coll {"_id" user})]
+  (let [result (mc/find-maps @db coll {"_id" user})]
     (if (pos? (count result))
       (nth result 0)
       nil)))
@@ -24,12 +25,12 @@
 (defn- ensure-record-exists [user]
   (if-let [record (get-record user)]
     :ok
-    (mc/insert db coll {"_id" user
+    (mc/insert @db coll {"_id" user
                         :donations []})))
 
 (defn add-fame [user from reason amount time]
   (ensure-record-exists user)
-  (mc/find-and-modify db coll {"_id" user}
+  (mc/find-and-modify @db coll {"_id" user}
                       {"$push" {:donations {:from from
                                             :reason reason
                                             :amount amount
@@ -37,7 +38,7 @@
                       {"upsert" true}))
 
 (defn leaders [amount]
-  (->> (mc/find-maps db coll)
+  (->> (mc/find-maps @db coll)
        (map :_id)
        (map (juxt identity get-fame))
        (sort-by #(get % 1))

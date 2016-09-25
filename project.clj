@@ -1,4 +1,4 @@
-(defproject fejmetr "1.0.0-SNAPSHOT"
+(defproject fejmetr "1.0.1-SNAPSHOT"
   :description "Demo Clojure web app"
   :url "http://fejmetr.herokuapp.com"
   :license {:name "Eclipse Public License v1.0"
@@ -15,4 +15,6 @@
   :plugins [[environ/environ.lein "0.3.1"]]
   :hooks [environ.leiningen.hooks]
   :uberjar-name "fejmetr.jar"
+  :aot [fejmetr.web]
+  :main fejmetr.web
   :profiles {:production {:env {:production true}}})

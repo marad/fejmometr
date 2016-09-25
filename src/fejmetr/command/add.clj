@@ -39,7 +39,11 @@
       ((comp not pos?) (:amount args)) {:color "red"
                                         :message (str "That's not adding fame...")
                                         }
-      :else (do (repo/add-fame (:name receiver) (:name sender) (:reason args) (:amount args))
+      :else (do (repo/add-fame (:name receiver)
+                               (:name sender)
+                               (:reason args)
+                               (:amount args)
+                               (. System currentTimeMillis))
                 (decorate
                   receiver
                   {:color "green"
