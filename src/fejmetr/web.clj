@@ -26,6 +26,27 @@
            :headers {"Content-Type" "application/json"}
            :body (json/write-str (handler/dispatch data))}))
 
+  (POST "/handshake"
+        {body :body}
+        (println "Received handshake" (str body))
+        {:status 200
+         :body "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+               <ovs_response>
+               <code>0</code>
+               <message>Authorization succeeded!</message>
+               <data>http://asset-service-test.qxlint/presentations-upload</data>
+               </ovs_response>"
+         }
+        )
+
+  (POST "/upload"
+        {body :body}
+        (println "Receiving file" (str body))
+        {:status 200
+         :body (json/write-str "NOT IMPLEMENTED")
+         }
+        )
+
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
 
