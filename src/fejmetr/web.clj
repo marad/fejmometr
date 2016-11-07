@@ -34,7 +34,7 @@
                <ovs_response>
                <code>0</code>
                <message>Authorization succeeded!</message>
-               <data>http://asset-service-test.qxlint/presentations-upload</data>
+               <data>http://fejmetr.herokuapp.com/upload</data>
                </ovs_response>"
          }
         )
