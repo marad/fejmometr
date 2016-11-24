@@ -1,7 +1,7 @@
 (ns fejmetr.web
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [compojure.handler :refer [site]]
-            [compojure.route :as route]
+            [compojure.route :as route :refer [resources]]
             [clojure.java.io :as io]
             [ring.adapter.jetty :as jetty]
             [clojure.data.json :as json]
@@ -46,6 +46,8 @@
          :body (json/write-str "NOT IMPLEMENTED")
          }
         )
+
+  (resources "/public")
 
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
