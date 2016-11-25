@@ -12,7 +12,6 @@
    :reason reason}))
 
 (defn decorate [receiver response]
-  (println (:name receiver))
   (if (= (:name receiver) "Dorota Leszczynska")
     (assoc response
            :color "purple"
