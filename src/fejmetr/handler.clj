@@ -13,9 +13,10 @@
 
 (defn leaders [message]
   {:color "green"
+   :message_format "html"
    :message (->> (repo/leaders 100)
                  (map #(str (get % 0) ": " (get % 1)))
-                 (s/join "\\n")
+                 (s/join "<br/>")
                  )})
 
 (defn help [message]
