@@ -7,8 +7,10 @@
 (def db (atom nil))
 
 (defstate conn
-  :start (let [conn (mg/connect)]
-           (reset! db (mg/get-db conn "fejmetr"))
+  :start (let [{conn :conn database :db}
+               (mg/connect-via-uri (or (System/getenv "MONGODB_URI")
+                                       "mongodb://localhost:27017/fejmetr"))]
+           (reset! db database)
            conn)
   :stop (do (mg/disconnect conn)
             (reset! db nil)))

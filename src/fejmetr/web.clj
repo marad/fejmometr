@@ -6,6 +6,8 @@
             [ring.adapter.jetty :as jetty]
             [clojure.data.json :as json]
             [fejmetr.handler :as handler]
+            [fejmetr.mongo :as mongo]
+            [mount.core :as mount]
             [environ.core :refer [env]])
   (:gen-class))
 
@@ -17,6 +19,7 @@
 (defroutes app
   (GET "/" []
        (splash))
+
   (POST "/command"
         {body :body}
         (let [js (slurp body)
@@ -26,33 +29,13 @@
            :headers {"Content-Type" "application/json"}
            :body (json/write-str (handler/dispatch data))}))
 
-  (POST "/handshake"
-        {body :body}
-        (println "Received handshake" (str body))
-        {:status 200
-         :body "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-               <ovs_response>
-               <code>0</code>
-               <message>Authorization succeeded!</message>
-               <data>http://fejmetr.herokuapp.com/upload</data>
-               </ovs_response>"
-         }
-        )
-
-  (POST "/upload"
-        {body :body}
-        (println "Receiving file" (str body))
-        {:status 200
-         :body (json/write-str "NOT IMPLEMENTED")
-         }
-        )
-
   (resources "/public")
 
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
 
 (defn -main [& [port]]
+  (println (mount/start))
   (let [port (Integer. (or port (env :port) 5000))]
     (jetty/run-jetty (site #'app) {:port port :join? false})))
 
