@@ -11,10 +11,17 @@
      :message (str (:mention_name user) " has " (repo/get-fame (:name user)) " fame")
      }))
 
+(defn- apply-max-fame [[user-name fame]]
+  (if (= user-name "Dorota Leszczynska")
+    [user-name (str "MAX (" fame ")")]
+    [user-name fame]
+    ))
+
 (defn leaders [message]
   {:color "green"
    :message_format "html"
    :message (->> (repo/leaders 100)
+                 (map apply-max-fame)
                  (map #(str (get % 0) ": " (get % 1)))
                  (s/join "<br/>")
                  )})
