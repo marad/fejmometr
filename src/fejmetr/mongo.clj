@@ -1,7 +1,10 @@
 (ns fejmetr.mongo
   (:require [monger.core :as mg]
             [monger.collection :as mc]
-            [mount.core :refer [defstate]]))
+            [mount.core :refer [defstate]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            ))
 
 (def coll "fame")
 (def db (atom nil))
@@ -22,7 +25,14 @@
       nil)))
 
 (defn get-fame [user]
-  (reduce + (map :amount (:donations (get-record user)))))
+  (let [from-time (t/minus (t/now) (-> 2 t/weeks))
+        timestamp (tc/to-long from-time)]
+    (->> (get-record user)
+         :donations
+         (filter #(< timestamp (:timestamp %)))
+         (map :amount)
+         (reduce +)
+         )))
 
 (defn- ensure-record-exists [user]
   (if-let [record (get-record user)]
