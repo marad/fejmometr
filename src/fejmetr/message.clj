@@ -1,30 +1,47 @@
 (ns fejmetr.message
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as str]
+            [schema.core :as s]))
 
-(defn event-type [message]
+(def Mention {:id s/Str :mention_name s/Str :name s/Str})
+(def Message
+  {:event s/Str
+   :item {:message {:from Mention
+                    :mentions [Mention]
+                    :message s/Str}
+          :room {:name s/Str}}})
+
+(s/defn event-type :- s/Str
+  [message :- Message]
   (:event message))
 
-(defn command [message]
+(s/defn command :- s/Str
+  [message :- Message]
   (-> (get-in message [:item :message :message])
-       (s/split #"\s+" 3)
+       (str/split #"\s+" 3)
        (nth 1)
        ))
 
-(defn command-args [message]
+(s/defn command-args :- s/Str
+  [message :- Message]
   (-> (get-in message [:item :message :message])
-      (s/split #"\s+" 3)
+      (str/split #"\s+" 3)
       (nth 2)))
 
-(defn clear-mention [mention]
-  (.replaceAll (s/trim mention) "@" ""))
+(s/defn clear-mention :- s/Str
+  [mention :- s/Str]
+  (.replaceAll (str/trim mention) "@" ""))
 
-(defn mentions [message]
+(s/defn mentions :- [Mention]
+  [message :- Message]
   (get-in message [:item :message :mentions]))
 
-(defn find-mention [message mentioned]
+(s/defn find-mention :- (s/maybe Mention)
+  [message :- Message
+   mentioned :- s/Str]
   (->> (get-in message [:item :message :mentions])
        (filter #(= (clear-mention mentioned) (:mention_name %)))
        first))
 
-(defn sender [message]
+(s/defn sender :- Mention
+  [message :- Message]
   (get-in message [:item :message :from]))

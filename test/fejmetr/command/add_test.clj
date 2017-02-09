@@ -5,7 +5,8 @@
             ))
 
 (deftest adding-fame
-  (let [add-message {:item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
+  #_(let [add-message {:event "room_message"
+                     :item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
                                       :mentions [{:id "2"
                                                   :mention_name "sos"
                                                   :name "Sweet Sauce"
@@ -19,7 +20,8 @@
            ))))
 
 (deftest cannot-add-self
-  (let [add-self-message {:item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
+  (let [add-self-message {:event "room_message"
+                          :item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
                                            :mentions [{:id "1"
                                                        :mention_name "Blinky"
                                                        :name "Blinky the Fish"
@@ -34,7 +36,8 @@
   )
 
 (deftest cannot-add-without-mention
-  (let [add-message {:item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
+  (let [add-message {:event "room_message"
+                     :item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
                                       :mentions []
                                       :message "/fame add @sos 10 some reason"}
                             :room {:name "test-room"}}}]

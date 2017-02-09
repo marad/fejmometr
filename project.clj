@@ -3,8 +3,9 @@
   :url "http://fejmetr.herokuapp.com"
   :license {:name "Eclipse Public License v1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.293"]
+                 [prismatic/schema "1.1.3"]
                  [compojure "1.4.0"]
                  [ring/ring-jetty-adapter "1.4.0"]
                  [org.clojure/data.json "0.2.6"]
