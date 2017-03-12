@@ -5,7 +5,7 @@
             ))
 
 (deftest adding-fame
-  #_(let [add-message {:event "room_message"
+  (let [add-message {:event "room_message"
                      :item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
                                       :mentions [{:id "2"
                                                   :mention_name "sos"
