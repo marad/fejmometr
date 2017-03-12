@@ -19,7 +19,8 @@
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.3.1"]
             [lein-cljsbuild "1.1.4"]
-            [lein-figwheel "0.5.4-7"]]
+            [lein-figwheel "0.5.4-7"]
+            [lein-embongo "0.2.2"]]
   :hooks [environ.leiningen.hooks]
   :uberjar-name "fejmetr.jar"
   :aot [fejmetr.web]

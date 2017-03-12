@@ -2,7 +2,11 @@
   (:require [clojure.test :refer :all]
             [fejmetr.command.add :as add]
             [fejmetr.repo :as repo]
+            [fejmetr.fixtures :refer [app]]
             ))
+
+
+(use-fixtures :once app)
 
 (deftest adding-fame
   (let [add-message {:event "room_message"
