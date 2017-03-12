@@ -4,78 +4,85 @@
             [fejmetr.message :as msg]
             [schema.core :as s]))
 
-(def AddArgs {:receiver s/Str
+(def AddArgs {:receivers [s/Str]
               :amount s/Num
               :reason s/Str})
 (def HCResponse {:color s/Str
                  :message s/Str})
 
-(comment
+(def TokenType (s/enum :mention :number :text))
 
-  (def message {:event "room_message"
-                     :item {:message {:from {:id "1" :mention_name "Blinky" :name "Blinky the Fish"}
-                                      :mentions [{:id "2"
-                                                  :mention_name "sos"
-                                                  :name "Sweet Sauce"
-                                                  }]
-                                      :message "/fame add @sos 10 some reason"}
-                            :room {:name "test-room"}}})
 
-  (def args (parse-args message))
-  (def sender (msg/sender message))
-  (def receiver (msg/find-mention message (:receiver args)))
-  )
+(s/defn token-type :- TokenType
+  [token :- s/Str]
+  (cond
+    (str/starts-with? token "@") :mention
+    (re-matches #"([0-9]+\/[0-9]+)|([0-9]+(.[0-9]+)?)" token) :number
+    :else :text))
+
+
+(s/defn remove-first-number :- [s/Str]
+  [tokens :- [s/Str]]
+  (let [[m n] (split-with #(not= (token-type %) :number) tokens)]
+    (concat m (rest n))))
+
+
+(s/defn get-reason :- s/Str
+  [tokens :- [s/Str]]
+  (->> tokens
+       remove-first-number
+       (remove #(= (token-type %) :mention))
+       (str/join " ")))
+
 
 (s/defn parse-args :- AddArgs
   [message :- msg/Message]
   (let [args (msg/command-args message)
-        [receiver amount reason] (str/split args #"\s+" 3)]
-    {:receiver (msg/clear-mention receiver)
-     :amount (read-string amount)
-     :reason reason}))
+        tokens (str/split args #"\s+")]
+    {:receivers (->> tokens (filter #(= (token-type %) :mention)) (map msg/clear-mention))
+     :amount (->> tokens (filter #(= (token-type %) :number)) first read-string)
+     :reason (get-reason tokens)}))
 
-(s/defn decorate :- HCResponse
-  [receiver :- msg/Mention
-   response :- HCResponse]
-  (if (= (:name receiver) "Dorota Leszczynska")
-    (assoc response
-           :color "purple"
-           :message (str "(heart) " (:message response) " (heart)")
-           :message_format "text"
-           :notify false
-           )
-    response
-    )
-  )
+
+(s/defn show-receivers :- s/Str
+  [receivers :- [msg/Mention]]
+  (let [receivers (map :mention_name receivers)]
+    (loop [acc (first receivers)
+           tail (rest receivers)]
+          (case (count tail)
+            0 acc
+            1 (str acc " and " (first tail))
+            (recur (str acc ", " (first tail)) (rest tail))))))
+
 
 (s/defn execute :- HCResponse
   [message :- msg/Message]
   (let [args (parse-args message)
         sender (msg/sender message)
-        receiver (msg/find-mention message (:receiver args))
+        receivers (->> (:receivers args) (map (partial msg/find-mention message)) (remove nil?))
         ]
     (cond
-      (= (:id sender) (:id receiver))
+      ((set (map :id receivers)) (:id sender))
       {:color "red"
-       :message "That's cheating!"}
+       :message "You cannot add fame to yourself!"}
 
-      (nil? receiver)
+      (empty? receivers)
       {:color "red"
-       :message (str "Who is " (:receiver args) "?")}
+       :message "Who is the receiver?"}
 
       ((comp not pos?) (:amount args))
       {:color "red"
        :message (str "That's not adding fame...")}
 
       :else
-      (do (repo/add-fame (:name receiver)
-                         (:name sender)
-                         (:reason args)
-                         (:amount args)
-                         (. System currentTimeMillis))
-        (decorate
-          receiver
+      (do
+        (doseq [receiver receivers]
+               (repo/add-fame (:name receiver)
+                              (:name sender)
+                              (:reason args)
+                              (:amount args)
+                              (. System currentTimeMillis)))
           {:color "green"
-           :message (str (:mention_name receiver) " got " (:amount args) " fame from "
-                         (:mention_name sender) "; reason: " (:reason args))}))
+           :message (str (show-receivers receivers) " got " (:amount args) " fame from "
+                         (:mention_name sender) " for: " (:reason args))})
       )))
