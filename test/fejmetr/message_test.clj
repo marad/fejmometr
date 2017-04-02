@@ -1,6 +1,8 @@
 (ns fejmetr.message-test
   (:require [clojure.test :refer :all]
             [fejmetr.message :as msg]
+            [fejmetr.error :as e]
+            [rail.core :as r]
             ))
 
 (def add-message
@@ -20,12 +22,12 @@
 
 (deftest getting-command-type
   (is (= (msg/command add-message)
-         "add"
+         (r/succeed "add")
          )))
 
 (deftest getting-command-args
   (is (= (msg/command-args add-message)
-         "@sos 10 some reason"
+         (r/succeed "@sos 10 some reason")
          ))
   )
 
@@ -42,13 +44,17 @@
          )))
 
 (deftest finding-mention
-  (is (= (msg/find-mention add-message "sos")
-         {:mention_name "sos"
-          :name "Sweet Sauce"
-          }
-         )))
+  (testing "finding mention"
+           (is (= (msg/find-mention add-message "sos")
+                  (r/succeed {:mention_name "sos"
+                              :name "Sweet Sauce"})
+                  )))
+  (testing "error message when mention not found"
+           (is (= (r/map-messages ex-data (msg/find-mention add-message "invalid-mention"))
+                  (r/map-messages ex-data (r/fail (e/mention-not-found "invalid-mention")))
+                  ))))
 
 (deftest sender
   (is (= (msg/sender add-message)
-         {:mention_name "Blinky" :name "Blinky the Fish"}
+         (r/succeed {:mention_name "Blinky" :name "Blinky the Fish"})
          )))

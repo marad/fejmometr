@@ -4,6 +4,8 @@
             [fejmetr.command.add :as add]
             [fejmetr.repo :as repo]
             [fejmetr.fixtures :refer [app clear-db]]
+            [fejmetr.error :as e]
+            [rail.core :as r]
             ))
 
 
@@ -20,9 +22,9 @@
                                       :message "/fame add @sos 10 some reason"}
                             :room {:name "test-room"}}}]
     (is (= (add/execute add-message)
-           {:color "green"
-            :message "sos got 10 fame from Blinky for: some reason"}))
-    (is (= (repo/get-fame "Sweet Sauce") 10))))
+           (r/succeed "sos got 10 fame from Blinky for: some reason")
+           ))
+    (is (= (repo/get-fame "Sweet Sauce") (r/succeed 10)))))
 
 
 (deftest adding-fame-to-multiple-people
@@ -40,11 +42,10 @@
                                       :message "/fame add @sos @peper 10 @salt some reason"}
                             :room {:name "test-room"}}}]
     (is (= (add/execute add-message)
-           {:color "green"
-            :message "sos, peper and salt got 10 fame from Blinky for: some reason"}))
-    (is (= (repo/get-fame "Sweet Sauce") 10))
-    (is (= (repo/get-fame "Hot Peper") 10))
-    (is (= (repo/get-fame "Sour Salt") 10))
+           (r/succeed  "sos, peper and salt got 10 fame from Blinky for: some reason")))
+    (is (= (repo/get-fame "Sweet Sauce") (r/succeed 10)))
+    (is (= (repo/get-fame "Hot Peper") (r/succeed 10)))
+    (is (= (repo/get-fame "Sour Salt") (r/succeed 10)))
     ))
 
 
@@ -57,9 +58,9 @@
                                                        }]
                                            :message "/fame add @Blinky 10 some reason"}
                                  :room {:name "test-room"}}}]
-    (is (= (add/execute add-self-message)
-           {:color "red"
-            :message "You cannot add fame to yourself!"}))))
+    (is (= (r/map-messages ex-data (add/execute add-self-message))
+           (r/map-messages ex-data (r/fail (e/cannot-add-fame-to-self)))
+           ))))
 
 
 (deftest cannot-add-without-mention
@@ -68,7 +69,6 @@
                                       :mentions []
                                       :message "/fame add @sos 10 some reason"}
                             :room {:name "test-room"}}}]
-    (is (= (add/execute add-message)
-           {:color "red"
-            :message "Who is the receiver?"}))))
+    (is (= (r/map-messages ex-data (add/execute add-message))
+           (r/map-messages ex-data (r/fail (e/mention-not-found "sos")))))))
 

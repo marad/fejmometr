@@ -4,10 +4,15 @@
             [mount.core :refer [defstate]]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
+            [rail.core :as r]
+            [fejmetr.error :as e]
             ))
 
 (def coll "fame")
 (def db (atom nil))
+
+(defn- get-db []
+  (r/fail-if-nil (e/not-connected-to-db) @db))
 
 (defstate conn
   :start (let [{conn :conn database :db}
@@ -18,41 +23,56 @@
   :stop (do (mg/disconnect conn)
             (reset! db nil)))
 
-(defn get-record [user]
-  (let [result (mc/find-maps @db coll {"_id" user})]
-    (if (pos? (count result))
-      (nth result 0)
-      nil)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Private parts
 
-(defn get-fame [user]
+(defn- calc-fame [user-record]
   (let [from-time (t/minus (t/now) (-> 2 t/weeks))
         timestamp (tc/to-long from-time)]
-    (->> (get-record user)
+    (->> user-record
          :donations
          (filter #(< timestamp (:timestamp %)))
          (map :amount)
-         (reduce +)
-         )))
+         (reduce +))))
 
-(defn- ensure-record-exists [user]
-  (if-let [record (get-record user)]
-    :ok
-    (mc/insert @db coll {"_id" user
-                        :donations []})))
-
-(defn add-fame [user from reason amount time]
-  (ensure-record-exists user)
-  (mc/find-and-modify @db coll {"_id" user}
-                      {"$push" {:donations {:from from
-                                            :reason reason
-                                            :amount amount
-                                            :timestamp time}}}
-                      {"upsert" true}))
-
-(defn leaders [amount]
-  (->> (mc/find-maps @db coll)
-       (map :_id)
-       (map (juxt identity get-fame))
+(defn- calc-leaders [amount records]
+  (->> records
+       (map (juxt :_id calc-fame))
        (sort-by #(get % 1))
        reverse
        (take amount)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Public
+
+(defn get-record [user]
+  (->> (get-db)
+       (r/map #(mc/find-maps % coll {"_id" user}))
+       (r/map first)
+       (r/either (r/fail-if-nil (e/user-not-found user))
+                 r/fail)))
+
+(defn get-fame [user]
+    (->> (get-record user)
+         (r/map calc-fame)))
+
+(defn add-fame [user from reason amount time]
+  (let [donation {:from from
+                  :reason reason
+                  :amount amount
+                  :timestamp time}]
+    (->> (get-record user)
+         (r/either (fn [_ _]
+                       (->> (get-db)
+                            (r/map #(mc/find-and-modify % coll {"_id" user}
+                                                        {"$push" {:donations donation}}
+                                                        {"upsert" true}))))
+                   (fn [_]
+                       (->> (get-db)
+                            (r/map #(mc/insert % coll
+                                               {"_id" user :donations [donation]}))))))))
+
+(defn leaders [amount]
+  (->> (get-db)
+       (r/map #(mc/find-maps % coll))
+       (r/map (partial calc-leaders amount))))

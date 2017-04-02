@@ -13,6 +13,7 @@
                  [environ "1.0.0"]
                  [com.novemberain/monger "3.1.0"]
                  [mount "0.1.10"]
+                 [marad/rail "0.1.3-SNAPSHOT"]
 
                  ;; CLJS dependencies
                  [reagent "0.6.0"]]
